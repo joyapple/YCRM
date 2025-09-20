@@ -290,15 +290,30 @@ nbdist/
 
 # Database
 *.db
-*.db3
-*.sqlite
 *.sqlite3
+instance/
 
-# Configuration files that may contain sensitive information
-*.env
-*.config
-config.json
-settings.json
+# Python bytecode and cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
 # Temporary and cache files
 tmp/
