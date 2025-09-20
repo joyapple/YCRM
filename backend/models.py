@@ -4,12 +4,44 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 
+class Department(db.Model):
+    """部门模型"""
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)
+    description = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # 关联到用户表
+    users = db.relationship('User', backref='department', lazy=True)
+    
+    def __repr__(self):
+        return f'<Department {self.name}>'
+
+class Role(db.Model):
+    """角色模型"""
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False, unique=True)
+    description = db.Column(db.Text)
+    permissions = db.Column(db.Text)  # 存储权限列表，可以是JSON格式
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # 关联到用户表
+    users = db.relationship('User', backref='role_obj', lazy=True)
+    
+    def __repr__(self):
+        return f'<Role {self.name}>'
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(120), nullable=False)
     role = db.Column(db.String(20), nullable=False, default='employee')  # admin, employee
+    department_id = db.Column(db.Integer, db.ForeignKey('department.id'))  # 部门关联
+    role_id = db.Column(db.Integer, db.ForeignKey('role.id'))  # 角色关联
+    data_scope = db.Column(db.String(20), nullable=False, default='own')  # 数据权限范围: own, department, all
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -20,6 +52,14 @@ class User(db.Model):
     def check_password(self, password):
         """验证密码"""
         return check_password_hash(self.password_hash, password)
+    
+    def is_admin(self):
+        """检查用户是否为管理员"""
+        return self.role == 'admin'
+    
+    def is_employee(self):
+        """检查用户是否为普通员工"""
+        return self.role == 'employee'
 
     def __repr__(self):
         return f'<User {self.username}>'
@@ -64,6 +104,7 @@ class FollowUp(db.Model):
 class Opportunity(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # 关联的用户（销售）
     name = db.Column(db.String(100), nullable=False)  # 商机名称
     description = db.Column(db.Text)  # 商机描述
     estimated_amount = db.Column(db.Float)  # 预估金额
@@ -72,8 +113,9 @@ class Opportunity(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # 关联到客户表
+    # 关联到客户表和用户表
     customer = db.relationship('Customer', backref=db.backref('opportunities', lazy=True))
+    user = db.relationship('User', backref=db.backref('opportunities', lazy=True))
 
     def __repr__(self):
         return f'<Opportunity {self.name}>'
@@ -81,6 +123,7 @@ class Opportunity(db.Model):
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # 关联的用户（销售）
     opportunity_id = db.Column(db.Integer, db.ForeignKey('opportunity.id'))  # 关联的商机
     order_number = db.Column(db.String(50), unique=True, nullable=False)  # 订单编号
     amount = db.Column(db.Float, nullable=False)  # 订单金额
@@ -90,8 +133,9 @@ class Order(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
-    # 关联到客户表和商机表
+    # 关联到客户表、用户表和商机表
     customer = db.relationship('Customer', backref=db.backref('orders', lazy=True))
+    user = db.relationship('User', backref=db.backref('orders', lazy=True))
     opportunity = db.relationship('Opportunity', backref=db.backref('orders', lazy=True))
 
     def __repr__(self):

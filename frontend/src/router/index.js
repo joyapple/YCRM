@@ -53,6 +53,21 @@ const routes = [
         path: 'tasks',  // 修复：移除开头的斜杠
         name: 'Tasks',
         component: () => import('../views/Tasks.vue')
+      },
+      {
+        path: 'users',  // 添加用户管理路由
+        name: 'Users',
+        component: () => import('../views/Users.vue')
+      },
+      {
+        path: 'departments',  // 添加部门管理路由
+        name: 'Departments',
+        component: () => import('../views/Departments.vue')
+      },
+      {
+        path: 'roles',  // 添加角色管理路由
+        name: 'Roles',
+        component: () => import('../views/Roles.vue')
       }
     ],
     meta: { requiresAuth: true } // 添加需要认证的标记

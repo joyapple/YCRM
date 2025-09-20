@@ -76,7 +76,13 @@ export const userAPI = {
   getUsers: () => api.get('/users'),
   
   // 创建用户
-  createUser: (userData) => api.post('/users', userData)
+  createUser: (userData) => api.post('/users', userData),
+  
+  // 更新用户
+  updateUser: (id, userData) => api.put(`/users/${id}`, userData),
+  
+  // 删除用户
+  deleteUser: (id) => api.delete(`/users/${id}`)
 }
 
 // 客户相关 API
@@ -146,6 +152,36 @@ export const taskAPI = {
   
   // 创建任务
   createTask: (taskData) => api.post('/tasks', taskData)
+}
+
+// 部门相关 API
+export const departmentAPI = {
+  // 获取所有部门
+  getDepartments: () => api.get('/departments'),
+  
+  // 创建部门
+  createDepartment: (departmentData) => api.post('/departments', departmentData),
+  
+  // 更新部门
+  updateDepartment: (id, departmentData) => api.put(`/departments/${id}`, departmentData),
+  
+  // 删除部门
+  deleteDepartment: (id) => api.delete(`/departments/${id}`)
+}
+
+// 角色相关 API
+export const roleAPI = {
+  // 获取所有角色
+  getRoles: () => api.get('/roles'),
+  
+  // 创建角色
+  createRole: (roleData) => api.post('/roles', roleData),
+  
+  // 更新角色
+  updateRole: (id, roleData) => api.put(`/roles/${id}`, roleData),
+  
+  // 删除角色
+  deleteRole: (id) => api.delete(`/roles/${id}`)
 }
 
 export default api

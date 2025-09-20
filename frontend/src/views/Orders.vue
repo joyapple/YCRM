@@ -55,7 +55,11 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="paymentMethod" label="付款方式" width="100" />
+        <el-table-column prop="paymentMethod" label="付款方式" width="100">
+          <template #default="scope">
+            {{ getPaymentMethodText(scope.row.paymentMethod) }}
+          </template>
+        </el-table-column>
         <el-table-column prop="orderDate" label="下单日期" width="120" />
         <el-table-column label="操作" width="150">
           <template #default="scope">
@@ -387,6 +391,17 @@ export default {
       return statusMap[status] || '未知状态'
     }
     
+    // 添加付款方式文本映射函数
+    const getPaymentMethodText = (method) => {
+      const methodMap = {
+        'bank_transfer': '银行转账',
+        'alipay': '支付宝',
+        'wechat_pay': '微信支付',
+        'cash': '现金'
+      }
+      return methodMap[method] || method || '未知方式'
+    }
+    
     return {
       dialogVisible,
       dialogTitle,
@@ -406,7 +421,8 @@ export default {
       handleSizeChange,
       handleCurrentChange,
       getStatusType,
-      getStatusText
+      getStatusText,
+      getPaymentMethodText
     }
   }
 }

@@ -1,5 +1,6 @@
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from config import Config
@@ -13,6 +14,9 @@ def create_app():
     # 初始化数据库
     db.init_app(app)
     
+    # 初始化迁移工具
+    migrate = Migrate(app, db)
+    
     # 初始化JWT
     jwt = JWTManager(app)
     
@@ -25,6 +29,19 @@ def create_app():
     # 创建表
     with app.app_context():
         db.create_all()
+    
+    # 添加JWT错误处理
+    @jwt.expired_token_loader
+    def expired_token_callback(jwt_header, jwt_payload):
+        return jsonify({'message': 'Token has expired', 'status': 'error'}), 401
+
+    @jwt.invalid_token_loader
+    def invalid_token_callback(error):
+        return jsonify({'message': 'Invalid token', 'status': 'error'}), 401
+
+    @jwt.unauthorized_loader
+    def missing_token_callback(error):
+        return jsonify({'message': 'Missing token', 'status': 'error'}), 401
     
     @app.route('/')
     def hello():

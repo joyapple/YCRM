@@ -197,12 +197,18 @@ export default {
       try {
         const response = await followupAPI.getFollowups()
         if (response.data.status === 'success') {
-          // 将客户名称添加到跟进记录中
+          // 将客户名称添加到跟进记录中，并转换字段名
           const followupsData = response.data.followups.map(followup => {
             const customer = customers.value.find(c => c.id === followup.customer_id)
             return {
-              ...followup,
-              customerName: customer ? customer.name : '未知客户'
+              id: followup.id,
+              customerId: followup.customer_id,
+              customerName: customer ? customer.name : '未知客户',
+              content: followup.content,
+              followupType: followup.followup_type,
+              followupTime: followup.followup_time,
+              nextFollowupDate: followup.next_followup_date,
+              status: followup.status
             }
           })
           followups.value = followupsData
@@ -238,7 +244,16 @@ export default {
     
     const handleEdit = (row) => {
       dialogTitle.value = '编辑跟进'
-      Object.assign(currentFollowup, row)
+      // 正确映射字段
+      Object.assign(currentFollowup, {
+        id: row.id,
+        customerId: row.customerId,
+        content: row.content,
+        followupType: row.followupType,
+        followupTime: row.followupTime,
+        nextFollowupDate: row.nextFollowupDate,
+        status: row.status
+      })
       dialogVisible.value = true
     }
     

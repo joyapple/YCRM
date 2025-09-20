@@ -34,25 +34,38 @@
             <el-icon><Odometer /></el-icon>
             <span>仪表板</span>
           </el-menu-item>
-          <el-menu-item index="/layout/customers">
+          <el-menu-item index="/layout/customers" v-if="checkPermission('admin') || checkPermission('employee')">
             <el-icon><User /></el-icon>
             <span>客户管理</span>
           </el-menu-item>
-          <el-menu-item index="/layout/followups">
+          <el-menu-item index="/layout/followups" v-if="checkPermission('admin') || checkPermission('employee')">
             <el-icon><ChatDotRound /></el-icon>
             <span>销售跟进</span>
           </el-menu-item>
-          <el-menu-item index="/layout/opportunities">
+          <el-menu-item index="/layout/opportunities" v-if="checkPermission('admin') || checkPermission('employee')">
             <el-icon><Trophy /></el-icon>
             <span>商机管理</span>
           </el-menu-item>
-          <el-menu-item index="/layout/orders">
+          <el-menu-item index="/layout/orders" v-if="checkPermission('admin') || checkPermission('employee')">
             <el-icon><Document /></el-icon>
             <span>订单管理</span>
           </el-menu-item>
-          <el-menu-item index="/layout/tasks">
+          <el-menu-item index="/layout/tasks" v-if="checkPermission('admin') || checkPermission('employee')">
             <el-icon><Check /></el-icon>
             <span>任务管理</span>
+          </el-menu-item>
+          <!-- 管理员专用菜单 -->
+          <el-menu-item index="/layout/users" v-if="checkPermission('admin')">
+            <el-icon><User /></el-icon>
+            <span>用户管理</span>
+          </el-menu-item>
+          <el-menu-item index="/layout/departments" v-if="checkPermission('admin')">
+            <el-icon><OfficeBuilding /></el-icon>
+            <span>部门管理</span>
+          </el-menu-item>
+          <el-menu-item index="/layout/roles" v-if="checkPermission('admin')">
+            <el-icon><User /></el-icon>
+            <span>角色管理</span>
           </el-menu-item>
         </el-menu>
       </el-aside>
@@ -74,8 +87,10 @@ import {
   Trophy, 
   Document, 
   Check,
-  ArrowDown
+  ArrowDown,
+  OfficeBuilding
 } from '@element-plus/icons-vue'
+import { hasPermission } from '../utils/permissions'
 
 export default {
   name: 'Layout',
@@ -86,13 +101,14 @@ export default {
     Trophy,
     Document,
     Check,
-    ArrowDown
+    ArrowDown,
+    OfficeBuilding
   },
   setup() {
     const router = useRouter()
     const route = useRoute()
     const activeMenu = ref(route.name?.toLowerCase() || 'dashboard')
-    const currentUser = ref({ username: '管理员' })
+    const currentUser = ref({ username: '管理员', role: 'admin' })
     
     // 页面加载时获取当前用户信息
     onMounted(() => {
@@ -108,6 +124,11 @@ export default {
     const handleMenuSelect = (index) => {
       activeMenu.value = index
       router.push(index)
+    }
+    
+    // 使用导入的权限检查函数
+    const checkPermission = (requiredRole) => {
+      return hasPermission(currentUser.value, requiredRole)
     }
     
     const handleUserCommand = (command) => {
@@ -129,7 +150,8 @@ export default {
       activeMenu,
       currentUser,
       handleMenuSelect,
-      handleUserCommand
+      handleUserCommand,
+      checkPermission
     }
   }
 }
